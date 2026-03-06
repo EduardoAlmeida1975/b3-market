@@ -382,19 +382,12 @@ if('serviceWorker' in navigator){
 const TOKEN = 'uKiNpAT6kwMvMDRhEKGFK5';
 const BASE  = 'https://brapi.dev/api';
 
-// Mapa de contratos futuros: vencimento rotativo mensal
-// Letras: F=Jan G=Feb H=Mar J=Apr K=May M=Jun N=Jul Q=Aug U=Sep V=Oct X=Nov Z=Dec
+// ── CONTRATOS FUTUROS B3 ──
+// Letras dos meses: F=Jan G=Feb H=Mar J=Apr K=May M=Jun N=Jul Q=Aug U=Sep V=Oct X=Nov Z=Dec
 const MONTH_CODES = ['F','G','H','J','K','M','N','Q','U','V','X','Z'];
-function getFutureCode(prefix){
-  const now = new Date();
-  let m = now.getMonth(); // 0-based
-  let y = now.getFullYear() % 100;
-  // contratos vencem na 3ª quarta-feira — se já passou, pula pro próximo mês
-  const thirdWed = nthWeekday(now.getFullYear(), now.getMonth(), 3, 3);
-  if(now >= thirdWed){ m++; if(m>11){m=0;y++;} }
-  return prefix + MONTH_CODES[m] + String(y).padStart(2,'0');
-}
+
 function nthWeekday(year, month, weekday, n){
+  // weekday: 0=Dom 1=Seg 2=Ter 3=Qua 4=Qui 5=Sex 6=Sab
   const d = new Date(year, month, 1);
   let count = 0;
   while(true){
@@ -403,19 +396,61 @@ function nthWeekday(year, month, weekday, n){
   }
 }
 
-// Tickers reais de futuros com vencimento atual
+function makeCode(prefix, year, month0){
+  // month0 = 0-based month index
+  let y = year, m = month0;
+  if(m > 11){ m -= 12; y++; }
+  return prefix + MONTH_CODES[m] + String(y % 100).padStart(2,'0');
+}
+
+// WIN/IND vencem na 3ª QUARTA-FEIRA de meses PARES (fev, abr, jun, ago, out, dez)
+function getWinCode(prefix){
+  const now = new Date();
+  let year = now.getFullYear();
+  let month = now.getMonth(); // 0-based
+  for(let i = 0; i < 14; i++){
+    const m = (month + i) % 12;
+    const y = year + Math.floor((month + i) / 12);
+    if((m + 1) % 2 === 0){ // mês par (fev=1, abr=3, jun=5...)
+      const venc = nthWeekday(y, m, 3, 3); // 3ª quarta (getDay=3)
+      if(now <= venc) return makeCode(prefix, y, m);
+    }
+  }
+  return prefix + 'J26';
+}
+
+// WDO/DOL vencem na 1ª QUARTA-FEIRA de todo mês
+function getWdoCode(prefix){
+  const now = new Date();
+  let year = now.getFullYear();
+  let month = now.getMonth();
+  for(let i = 0; i < 4; i++){
+    const m = (month + i) % 12;
+    const y = year + Math.floor((month + i) / 12);
+    const venc = nthWeekday(y, m, 3, 1); // 1ª quarta
+    if(now <= venc) return makeCode(prefix, y, m);
+  }
+  return prefix + 'J26';
+}
+
 const FUTURE_MAP = {
-  'WINFUT': () => getFutureCode('WIN'),  // Mini Índice
-  'WDOFUT': () => getFutureCode('WDO'),  // Mini Dólar
-  'DOLFUT': () => getFutureCode('DOL'),  // Dólar Cheio
-  'INDFUT': () => getFutureCode('IND'),  // Índice Cheio
+  'WINFUT': () => getWinCode('WIN'),
+  'INDFUT': () => getWinCode('IND'),
+  'WDOFUT': () => getWdoCode('WDO'),
+  'DOLFUT': () => getWdoCode('DOL'),
 };
 
-// Resolve ticker real (ex: WINFUT → WINH26)
 function resolveTickerReal(ticker){
   if(FUTURE_MAP[ticker]) return FUTURE_MAP[ticker]();
   return ticker;
 }
+
+// Log no console para debug
+console.log('Contratos futuros resolvidos:',
+  'WINFUT→'+resolveTickerReal('WINFUT'),
+  'WDOFUT→'+resolveTickerReal('WDOFUT'),
+  'DOLFUT→'+resolveTickerReal('DOLFUT')
+);
 
 // Sugestões de ativos populares
 const SUGGESTIONS_DB = [
