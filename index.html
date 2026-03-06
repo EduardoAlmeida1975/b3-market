@@ -11,305 +11,111 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>B3 Mercado</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-
 :root{
-  --bg:#0A0E1A;
-  --bg2:#0F1525;
-  --surface:#151D30;
-  --surface2:#1C2640;
-  --border:#1F2E4A;
-  --border2:#2A3D5E;
-  --text:#E8EDF8;
-  --text2:#7A8BAD;
-  --text3:#4A5878;
-  --green:#00E676;
-  --green-dim:#00C853;
-  --green-bg:rgba(0,230,118,0.08);
-  --red:#FF5252;
-  --red-dim:#E53935;
-  --red-bg:rgba(255,82,82,0.08);
-  --amber:#FFB300;
-  --accent:#3D7EFF;
-  --accent2:#5B9BFF;
-  --r:12px;
-  --mono:'IBM Plex Mono',monospace;
-  --sans:'IBM Plex Sans',sans-serif;
+  --bg:#0A0E1A;--bg2:#0F1525;--surface:#151D30;--surface2:#1C2640;
+  --border:#1F2E4A;--border2:#2A3D5E;
+  --text:#E8EDF8;--text2:#7A8BAD;--text3:#4A5878;
+  --green:#00E676;--green-bg:rgba(0,230,118,0.08);
+  --red:#FF5252;--red-bg:rgba(255,82,82,0.08);
+  --amber:#FFB300;--accent:#3D7EFF;--accent2:#5B9BFF;
+  --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;--r:12px;
 }
-
 html,body{height:100%;overscroll-behavior:none;}
-body{
-  font-family:var(--sans);
-  background:var(--bg);
-  color:var(--text);
-  min-height:100dvh;
-  display:flex;flex-direction:column;align-items:center;
-  padding-bottom:env(safe-area-inset-bottom,20px);
-}
-
-/* grid bg texture */
-body::before{
-  content:'';position:fixed;inset:0;
-  background-image:
-    linear-gradient(rgba(61,126,255,0.03) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(61,126,255,0.03) 1px,transparent 1px);
-  background-size:32px 32px;
-  pointer-events:none;z-index:0;
-}
-
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100dvh;display:flex;flex-direction:column;align-items:center;padding-bottom:40px;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(61,126,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(61,126,255,0.03) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;z-index:0;}
 .wrap{position:relative;z-index:1;width:100%;max-width:500px;display:flex;flex-direction:column;}
-
-/* ── HEADER ── */
-.header{
-  padding:calc(env(safe-area-inset-top,0px) + 24px) 20px 0;
-  display:flex;align-items:center;justify-content:space-between;
-}
-.logo{
-  display:flex;align-items:center;gap:10px;
-}
-.logo-badge{
-  width:34px;height:34px;border-radius:9px;
-  background:linear-gradient(135deg,#3D7EFF,#1A4FCC);
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--mono);font-size:11px;font-weight:600;color:#fff;
-  letter-spacing:-0.5px;
-}
-.logo-text{
-  font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);
-  letter-spacing:-0.3px;
-}
+.header{padding:calc(env(safe-area-inset-top,0px) + 24px) 20px 0;display:flex;align-items:center;justify-content:space-between;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-badge{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#3D7EFF,#1A4FCC);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;color:#fff;}
+.logo-text{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text);}
 .logo-text span{color:var(--accent2);}
 .header-right{display:flex;align-items:center;gap:8px;}
-.btn-refresh{
-  width:34px;height:34px;border-radius:9px;border:1px solid var(--border2);
-  background:var(--surface);color:var(--text2);
-  display:flex;align-items:center;justify-content:center;cursor:pointer;
-  transition:all 0.2s;
-}
+.btn-refresh{width:34px;height:34px;border-radius:9px;border:1px solid var(--border2);background:var(--surface);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;}
 .btn-refresh:active{transform:scale(0.9);}
 .btn-refresh.spinning svg{animation:spin 0.8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .last-update{font-family:var(--mono);font-size:10px;color:var(--text3);text-align:right;}
-
-/* ── MARKET SUMMARY BAR ── */
-.summary-bar{
-  margin:16px 20px 0;
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
-  padding:12px 16px;
-  display:flex;gap:0;overflow-x:auto;
-  scrollbar-width:none;
-}
+.summary-bar{margin:16px 20px 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;display:flex;overflow-x:auto;scrollbar-width:none;}
 .summary-bar::-webkit-scrollbar{display:none;}
-.summary-item{
-  flex-shrink:0;display:flex;flex-direction:column;gap:3px;
-  padding:0 16px;border-right:1px solid var(--border);
-}
-.summary-item:first-child{padding-left:0;}
-.summary-item:last-child{border-right:none;}
-.summary-ticker{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--text2);letter-spacing:0.05em;}
-.summary-price{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text);}
-.summary-chg{font-family:var(--mono);font-size:11px;font-weight:500;}
-.summary-chg.up{color:var(--green);}
-.summary-chg.down{color:var(--red);}
-.summary-chg.flat{color:var(--text2);}
-
-/* ── SEARCH + ADD ── */
-.search-row{
-  margin:16px 20px 0;
-  display:flex;gap:8px;
-}
-.search-box{
-  flex:1;display:flex;align-items:center;gap:8px;
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
-  padding:0 14px;
-  transition:border-color 0.2s;
-}
+.sum-item{flex-shrink:0;display:flex;flex-direction:column;gap:2px;padding:0 14px;border-right:1px solid var(--border);}
+.sum-item:first-child{padding-left:0;}
+.sum-item:last-child{border-right:none;}
+.sum-label{font-family:var(--mono);font-size:9px;font-weight:600;color:var(--text3);letter-spacing:0.05em;}
+.sum-price{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text);}
+.sum-chg{font-family:var(--mono);font-size:11px;font-weight:500;}
+.up{color:var(--green);}.down{color:var(--red);}.flat{color:var(--text2);}
+.search-row{margin:16px 20px 0;display:flex;gap:8px;}
+.search-box{flex:1;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:0 14px;transition:border-color 0.2s;}
 .search-box:focus-within{border-color:var(--accent);}
 .search-box svg{color:var(--text3);flex-shrink:0;}
-.search-input{
-  flex:1;border:none;outline:none;background:transparent;
-  font-family:var(--mono);font-size:14px;font-weight:500;color:var(--text);
-  padding:12px 0;text-transform:uppercase;
-}
+.search-input{flex:1;border:none;outline:none;background:transparent;font-family:var(--mono);font-size:14px;font-weight:500;color:var(--text);padding:13px 0;text-transform:uppercase;}
 .search-input::placeholder{color:var(--text3);text-transform:none;font-family:var(--sans);font-size:13px;}
-.btn-add-ticker{
-  background:linear-gradient(135deg,#3D7EFF,#1A4FCC);
-  border:none;border-radius:var(--r);
-  padding:0 18px;height:46px;
-  font-family:var(--sans);font-size:13px;font-weight:600;color:#fff;
-  cursor:pointer;white-space:nowrap;flex-shrink:0;
-  display:flex;align-items:center;gap:6px;
-  transition:opacity 0.2s,transform 0.15s;
-}
-.btn-add-ticker:active{transform:scale(0.96);}
-
-/* ── TABS ── */
-.tabs{
-  margin:14px 20px 0;
-  display:flex;gap:4px;
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:4px;
-}
-.tab{
-  flex:1;font-family:var(--sans);font-size:12px;font-weight:500;
-  color:var(--text2);background:transparent;border:none;border-radius:8px;
-  padding:8px 4px;cursor:pointer;text-align:center;transition:all 0.18s;
-}
-.tab.active{background:var(--surface2);color:var(--text);font-weight:600;border:1px solid var(--border2);}
-
-/* ── SUGGESTIONS DROPDOWN ── */
-.suggestions{
-  margin:4px 20px 0;
-  background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);
-  overflow:hidden;display:none;
-}
+.btn-add{background:linear-gradient(135deg,#3D7EFF,#1A4FCC);border:none;border-radius:var(--r);padding:0 18px;height:46px;font-family:var(--sans);font-size:13px;font-weight:600;color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.btn-add:active{transform:scale(0.96);}
+.suggestions{margin:4px 20px 0;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);overflow:hidden;display:none;}
 .suggestions.show{display:block;}
-.suggestion-item{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);
-  transition:background 0.15s;
-}
-.suggestion-item:last-child{border-bottom:none;}
-.suggestion-item:active{background:var(--border);}
-.sug-left{display:flex;flex-direction:column;gap:2px;}
+.sug-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);}
+.sug-item:last-child{border-bottom:none;}
+.sug-item:active{background:var(--border);}
 .sug-ticker{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text);}
-.sug-name{font-size:11px;color:var(--text2);}
-.sug-tag{font-size:10px;font-weight:600;color:var(--accent2);background:rgba(61,126,255,0.12);border-radius:4px;padding:2px 6px;}
-
-/* ── ASSET LIST ── */
-.list-area{margin:12px 20px 0;display:flex;flex-direction:column;gap:8px;}
-
-.empty-state{
-  padding:52px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;
-}
-.empty-icon{
-  width:56px;height:56px;border-radius:16px;border:1px solid var(--border2);
-  background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:24px;
-}
-.empty-title{font-size:16px;font-weight:600;color:var(--text);}
-.empty-sub{font-size:13px;color:var(--text2);line-height:1.6;max-width:260px;}
-
-/* ── ASSET CARD ── */
-.asset-card{
-  background:var(--surface);border:1px solid var(--border);border-radius:var(--r);
-  overflow:hidden;animation:cardIn 0.22s ease;
-  transition:border-color 0.2s;
-}
-.asset-card:active{border-color:var(--border2);}
-@keyframes cardIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
-
-.card-main{display:flex;align-items:center;padding:14px 16px;gap:12px;}
-
-.card-left{flex:1;min-width:0;}
-.card-top{display:flex;align-items:center;gap:8px;margin-bottom:4px;}
-.asset-ticker{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--text);}
-.asset-type-tag{
-  font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
-  border-radius:4px;padding:2px 6px;
-}
+.sug-name{font-size:11px;color:var(--text2);margin-top:2px;}
+.sug-tag{font-size:10px;font-weight:600;border-radius:4px;padding:2px 6px;}
 .tag-acao{background:rgba(61,126,255,0.12);color:var(--accent2);}
 .tag-futuro{background:rgba(255,179,0,0.12);color:var(--amber);}
-.tag-fii{background:rgba(0,230,118,0.10);color:var(--green-dim);}
-.asset-name{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;}
-
+.tabs{margin:14px 20px 0;display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:4px;}
+.tab{flex:1;font-family:var(--sans);font-size:12px;font-weight:500;color:var(--text2);background:transparent;border:none;border-radius:8px;padding:8px 4px;cursor:pointer;text-align:center;transition:all 0.18s;}
+.tab.active{background:var(--surface2);color:var(--text);font-weight:600;border:1px solid var(--border2);}
+.list-area{margin:12px 20px 0;display:flex;flex-direction:column;gap:8px;}
+.empty-state{padding:52px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;}
+.empty-icon{width:56px;height:56px;border-radius:16px;border:1px solid var(--border2);background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:24px;}
+.empty-title{font-size:16px;font-weight:600;}
+.empty-sub{font-size:13px;color:var(--text2);line-height:1.6;max-width:260px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;animation:cardIn 0.22s ease;}
+@keyframes cardIn{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+.card-inner{display:flex;align-items:stretch;}
+.card-accent{width:4px;flex-shrink:0;}
+.card-main{flex:1;display:flex;align-items:center;padding:14px 16px;gap:12px;}
+.card-left{flex:1;min-width:0;}
+.card-top{display:flex;align-items:center;gap:8px;margin-bottom:3px;}
+.card-ticker{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--text);}
+.card-tag{font-size:9px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;border-radius:4px;padding:2px 6px;}
+.card-name{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px;}
 .card-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
-.asset-price{font-family:var(--mono);font-size:17px;font-weight:600;color:var(--text);}
-.asset-price.loading{color:var(--text3);}
-.chg-badge{
-  font-family:var(--mono);font-size:12px;font-weight:600;
-  border-radius:6px;padding:3px 8px;
-}
-.chg-badge.up{background:var(--green-bg);color:var(--green);}
-.chg-badge.down{background:var(--red-bg);color:var(--red);}
-.chg-badge.flat{background:rgba(122,139,173,0.1);color:var(--text2);}
-.chg-badge.loading{background:var(--surface2);color:var(--text3);}
-
-/* card detail row */
-.card-detail{
-  display:none;padding:0 16px 14px;
-  border-top:1px solid var(--border);
-  margin-top:0;padding-top:12px;
-  grid-template-columns:repeat(3,1fr);gap:10px;
-}
+.card-price{font-family:var(--mono);font-size:17px;font-weight:600;color:var(--text);}
+.card-price.loading{color:var(--text3);font-size:13px;}
+.card-badge{font-family:var(--mono);font-size:12px;font-weight:600;border-radius:6px;padding:3px 8px;}
+.badge-up{background:var(--green-bg);color:var(--green);}
+.badge-down{background:var(--red-bg);color:var(--red);}
+.badge-flat{background:rgba(122,139,173,0.1);color:var(--text2);}
+.badge-load{background:var(--surface2);color:var(--text3);}
+.card-detail{display:none;padding:12px 16px 14px;border-top:1px solid var(--border);grid-template-columns:repeat(3,1fr);gap:10px;}
 .card-detail.open{display:grid;}
-.detail-item{display:flex;flex-direction:column;gap:3px;}
-.detail-label{font-size:10px;font-weight:500;color:var(--text3);letter-spacing:0.05em;text-transform:uppercase;}
-.detail-value{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text2);}
-.detail-value.up{color:var(--green);}
-.detail-value.down{color:var(--red);}
-
-.card-footer{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 16px 10px;
-}
-.card-footer.hidden{display:none;}
-.btn-detail{
-  font-family:var(--sans);font-size:11px;font-weight:500;color:var(--text3);
-  background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:4px;
-  transition:color 0.15s;padding:0;
-}
-.btn-detail:hover{color:var(--text2);}
-.btn-detail svg{transition:transform 0.2s;}
-.btn-detail.open svg{transform:rotate(180deg);}
-.btn-remove{
-  font-family:var(--sans);font-size:11px;color:var(--text3);
-  background:none;border:none;cursor:pointer;padding:0;
-  transition:color 0.15s;
-}
-.btn-remove:hover{color:var(--red);}
-
-/* skeleton pulse */
-.skeleton{
-  background:linear-gradient(90deg,var(--surface2) 25%,var(--border) 50%,var(--surface2) 75%);
-  background-size:200% 100%;
-  animation:shimmer 1.4s infinite;
-  border-radius:4px;
-}
-@keyframes shimmer{from{background-position:200% 0;}to{background-position:-200% 0;}}
-
-/* ── MINI SPARKLINE ── */
-.sparkline-wrap{padding:2px 16px 12px;}
-canvas.sparkline{width:100%;height:40px;display:block;}
-
-/* ── SNACKBAR ── */
-.snackbar{
-  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);
-  background:var(--surface2);border:1px solid var(--border2);
-  color:var(--text);font-family:var(--sans);font-size:13px;font-weight:500;
-  border-radius:10px;padding:11px 20px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.5);
-  transition:transform 0.3s cubic-bezier(.34,1.4,.64,1);
-  z-index:999;white-space:nowrap;
-}
+.det-label{font-size:10px;font-weight:500;color:var(--text3);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:3px;}
+.det-value{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text2);}
+.det-note{grid-column:1/-1;font-size:10px;color:var(--text3);font-style:italic;margin-top:2px;}
+.card-footer{display:flex;align-items:center;justify-content:space-between;padding:0 16px 10px;}
+.btn-det{font-family:var(--sans);font-size:11px;font-weight:500;color:var(--text3);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:4px;padding:0;}
+.btn-det svg{transition:transform 0.2s;}
+.btn-det.open svg{transform:rotate(180deg);}
+.btn-rem{font-family:var(--sans);font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;padding:0;}
+.footer-note{margin:20px 20px 0;font-size:11px;color:var(--text3);text-align:center;font-family:var(--mono);display:flex;align-items:center;justify-content:center;gap:6px;}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--amber);display:inline-block;}
+.snackbar{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:var(--sans);font-size:13px;font-weight:500;border-radius:10px;padding:11px 20px;box-shadow:0 8px 32px rgba(0,0,0,0.5);transition:transform 0.3s cubic-bezier(.34,1.4,.64,1);z-index:999;white-space:nowrap;}
 .snackbar.show{transform:translateX(-50%) translateY(0);}
-
-/* ── ERROR STATE ── */
-.error-card{
-  margin:12px 20px 0;
-  background:var(--red-bg);border:1px solid rgba(255,82,82,0.2);border-radius:var(--r);
-  padding:12px 16px;display:flex;align-items:center;gap:10px;
-}
-.error-card p{font-size:13px;color:var(--red);font-weight:500;}
-
-/* ── FOOTER NOTE ── */
-.footer-note{
-  margin:20px 20px 0;
-  font-size:11px;color:var(--text3);text-align:center;font-family:var(--mono);
-  display:flex;align-items:center;justify-content:center;gap:6px;
-}
-.delay-dot{width:6px;height:6px;border-radius:50%;background:var(--amber);display:inline-block;}
-
-/* scrollbar */
-::-webkit-scrollbar{width:4px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+.install-banner{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:16px 20px;align-items:center;gap:12px;z-index:1000;}
+.install-banner.show{display:flex;}
+.install-text{flex:1;font-size:13px;font-weight:600;color:var(--text);}
+.install-text small{display:block;font-size:11px;color:var(--text2);font-weight:400;margin-top:2px;}
+.btn-install{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;}
+.btn-dismiss{background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:4px;}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-<!-- HEADER -->
 <div class="header">
   <div class="logo">
     <div class="logo-badge">B3</div>
@@ -318,437 +124,364 @@ canvas.sparkline{width:100%;height:40px;display:block;}
   <div class="header-right">
     <div>
       <div class="last-update" id="lastUpdate">—</div>
-      <div style="font-size:10px;color:var(--text3);font-family:var(--mono);text-align:right;">~15min atraso</div>
+      <div style="font-size:10px;color:var(--text3);font-family:var(--mono);text-align:right;">~15min delay</div>
     </div>
-    <button class="btn-refresh" id="refreshBtn" title="Atualizar">
-      <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
-        <path d="M13.5 7.5a6 6 0 1 1-1.5-3.9M13.5 2v3.5H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
+    <button class="btn-refresh" id="refreshBtn">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M13.5 7.5a6 6 0 1 1-1.5-3.9M13.5 2v3.5H10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
   </div>
 </div>
 
-<!-- SUMMARY BAR (índices principais) -->
-<div class="summary-bar" id="summaryBar">
-  <div class="summary-item"><span class="summary-ticker">WINFUT</span><span class="summary-price skeleton" style="width:60px;height:13px;display:inline-block;">&nbsp;</span><span class="summary-chg flat">—</span></div>
-  <div class="summary-item"><span class="summary-ticker">WDOFUT</span><span class="summary-price skeleton" style="width:60px;height:13px;display:inline-block;">&nbsp;</span><span class="summary-chg flat">—</span></div>
-  <div class="summary-item"><span class="summary-ticker">DOLFUT</span><span class="summary-price skeleton" style="width:60px;height:13px;display:inline-block;">&nbsp;</span><span class="summary-chg flat">—</span></div>
+<div class="summary-bar">
+  <div class="sum-item"><span class="sum-label">USD/BRL</span><span class="sum-price" id="s0">—</span><span class="sum-chg flat" id="s0c">—</span></div>
+  <div class="sum-item"><span class="sum-label">IBOV</span><span class="sum-price" id="s1">—</span><span class="sum-chg flat" id="s1c">—</span></div>
+  <div class="sum-item"><span class="sum-label">PETR4</span><span class="sum-price" id="s2">—</span><span class="sum-chg flat" id="s2c">—</span></div>
+  <div class="sum-item"><span class="sum-label">VALE3</span><span class="sum-price" id="s3">—</span><span class="sum-chg flat" id="s3c">—</span></div>
 </div>
 
-<!-- SEARCH -->
 <div class="search-row">
   <div class="search-box">
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.4"/><line x1="9.5" y1="9.5" x2="12.5" y2="12.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
     <input class="search-input" id="searchInput" type="text" placeholder="Ex: PETR4, WINFUT, VALE3..." maxlength="10" autocomplete="off" autocorrect="off" spellcheck="false"/>
   </div>
-  <button class="btn-add-ticker" id="addBtn">
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><line x1="7" y1="2" x2="7" y2="12" stroke="white" stroke-width="1.8" stroke-linecap="round"/><line x1="2" y1="7" x2="12" y2="7" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
-    Adicionar
-  </button>
+  <button class="btn-add" id="addBtn">+ Adicionar</button>
 </div>
 
-<!-- SUGGESTIONS -->
 <div class="suggestions" id="suggestions"></div>
 
-<!-- TABS -->
 <div class="tabs">
   <button class="tab active" data-filter="all">Todos</button>
   <button class="tab" data-filter="acao">Ações</button>
   <button class="tab" data-filter="futuro">Futuros</button>
 </div>
 
-<!-- LIST -->
 <div class="list-area" id="listArea"></div>
 
-<!-- FOOTER -->
 <div class="footer-note">
-  <span class="delay-dot"></span>
-  Dados com ~15 min de atraso · brapi.dev
+  <span class="dot"></span>
+  Ações: brapi.dev · Futuros: USD/BRL e IBOVESPA de referência
 </div>
 
-</div><!-- /wrap -->
+</div>
 
 <div class="snackbar" id="snackbar"></div>
+<div class="install-banner" id="installBanner">
+  <div class="install-text">Instalar B3 Mercado<small>Adicionar à tela inicial</small></div>
+  <button class="btn-install" id="installBtn">Instalar</button>
+  <button class="btn-dismiss" id="dismissBtn">✕</button>
+</div>
 
 <script>
-// ── PWA SW ──
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./sw.js').then(reg => {
-    console.log('SW registrado:', reg.scope);
-  }).catch(e => console.warn('SW erro:', e));
+// PWA
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;document.getElementById('installBanner').classList.add('show');});
+document.getElementById('installBtn').addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;document.getElementById('installBanner').classList.remove('show');});
+document.getElementById('dismissBtn').addEventListener('click',()=>document.getElementById('installBanner').classList.remove('show'));
+
+// Config
+const TOKEN='uKiNpAT6kwMvMDRhEKGFK5';
+const FUTURES={'WINFUT':'ibov','INDFUT':'ibov','WDOFUT':'usd','DOLFUT':'usd'};
+const SUGS=[
+  {ticker:'PETR4',name:'Petrobras PN',type:'acao'},
+  {ticker:'PETR3',name:'Petrobras ON',type:'acao'},
+  {ticker:'VALE3',name:'Vale ON',type:'acao'},
+  {ticker:'ITUB4',name:'Itaú Unibanco PN',type:'acao'},
+  {ticker:'BBDC4',name:'Bradesco PN',type:'acao'},
+  {ticker:'BBAS3',name:'Banco do Brasil ON',type:'acao'},
+  {ticker:'ABEV3',name:'Ambev ON',type:'acao'},
+  {ticker:'WEGE3',name:'WEG ON',type:'acao'},
+  {ticker:'MGLU3',name:'Magazine Luiza ON',type:'acao'},
+  {ticker:'RENT3',name:'Localiza ON',type:'acao'},
+  {ticker:'SUZB3',name:'Suzano ON',type:'acao'},
+  {ticker:'BPAC11',name:'BTG Pactual UNT',type:'acao'},
+  {ticker:'GGBR4',name:'Gerdau PN',type:'acao'},
+  {ticker:'PRIO3',name:'PetroRio ON',type:'acao'},
+  {ticker:'EMBR3',name:'Embraer ON',type:'acao'},
+  {ticker:'RADL3',name:'Raia Drogasil ON',type:'acao'},
+  {ticker:'LREN3',name:'Lojas Renner ON',type:'acao'},
+  {ticker:'WINFUT',name:'Mini Índice (ref. IBOV)',type:'futuro'},
+  {ticker:'INDFUT',name:'Índice Cheio (ref. IBOV)',type:'futuro'},
+  {ticker:'WDOFUT',name:'Mini Dólar (ref. USD/BRL)',type:'futuro'},
+  {ticker:'DOLFUT',name:'Dólar Cheio (ref. USD/BRL)',type:'futuro'},
+];
+
+// State
+let watchlist=JSON.parse(localStorage.getItem('b3wl')||JSON.stringify([
+  {ticker:'PETR4',type:'acao'},{ticker:'VALE3',type:'acao'},
+  {ticker:'ITUB4',type:'acao'},{ticker:'WINFUT',type:'futuro'},{ticker:'WDOFUT',type:'futuro'}
+]));
+let cache={},openCards=new Set(),filter='all';
+
+function save(){localStorage.setItem('b3wl',JSON.stringify(watchlist));}
+function snack(msg,dur=2600){const el=document.getElementById('snackbar');el.textContent=msg;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),dur);}
+function now(){return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+function cc(v){return v>0?'up':v<0?'down':'flat';}
+function fmt(v,t){
+  if(v==null||isNaN(v))return '—';
+  if(t==='WDOFUT'||t==='DOLFUT')return v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:4});
+  if(v>999)return v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
+  return v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function fmtChg(v){if(v==null||isNaN(v))return '—';return(v>=0?'+':'')+v.toFixed(2)+'%';}
+function fmtVol(v){if(!v)return '—';if(v>=1e9)return(v/1e9).toFixed(1)+'B';if(v>=1e6)return(v/1e6).toFixed(1)+'M';if(v>=1e3)return(v/1e3).toFixed(0)+'K';return String(v);}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+// Fetch ação via brapi
+async function fetchAcao(ticker){
+  const res=await fetch(`https://brapi.dev/api/quote/${ticker}?token=${TOKEN}&fundamental=false&dividends=false`);
+  const d=await res.json();
+  if(!res.ok)throw new Error(d.message||d.error||'HTTP '+res.status);
+  if(d.error)throw new Error(d.message||d.error);
+  return(d.results&&d.results[0])||null;
 }
 
-// ── CONFIG ──
-const TOKEN = 'uKiNpAT6kwMvMDRhEKGFK5';
-const BASE  = 'https://brapi.dev/api';
-
-// ── FUTUROS: AwesomeAPI para câmbio + HG Finance para índice ──
-// Não existe API gratuita com CORS para WIN/WDO — usamos proxies equivalentes:
-// WDOFUT/DOLFUT → USD-BRL via AwesomeAPI (tempo real, CORS ok)
-// WINFUT/INDFUT → IBOVESPA via HG Brasil (15-45min delay)
-
-const FUTURE_MAP_TYPE = {
-  'WINFUT': 'ibov',
-  'INDFUT': 'ibov',
-  'WDOFUT': 'usd',
-  'DOLFUT': 'usd',
-};
-
-// USD/BRL via AwesomeAPI — gratuito, CORS habilitado, tempo real
-async function fetchUsdBrl(displayTicker){
-  const res = await fetch('https://economia.awesomeapi.com.br/json/USD-BRL/1');
-  const data = await res.json();
-  const q = data[0];
-  if(!q) throw new Error('Sem dados USD-BRL');
-  const price = parseFloat(q.bid);
-  const prev  = parseFloat(q.pctChange) ? price / (1 + parseFloat(q.pctChange)/100) : parseFloat(q.open);
-  const chgAbs = price - prev;
-  const chgPct = (chgAbs / prev) * 100;
-  // Converte para pontos de contrato: WDO cotado em R$/US$ × 10.000 (tamanho US$10k)
-  const contractPrice = displayTicker === 'DOLFUT' ? price * 50000 : price * 10000;
-  return {
-    symbol: displayTicker,
-    _displayTicker: displayTicker,
-    _realTicker: 'USD-BRL',
-    _source: 'awesomeapi',
-    shortName: displayTicker === 'DOLFUT' ? 'Dólar Futuro (ref. USD/BRL)' : 'Mini Dólar Futuro (ref. USD/BRL)',
-    longName: `Cotação USD/BRL: R$ ${price.toFixed(4)}`,
-    regularMarketPrice: price,       // mostra em R$/USD para referência
-    regularMarketChange: chgAbs,
-    regularMarketChangePercent: chgPct,
-    regularMarketPreviousClose: prev,
-    regularMarketOpen: parseFloat(q.open) || null,
-    regularMarketDayHigh: parseFloat(q.high) || null,
-    regularMarketDayLow:  parseFloat(q.low)  || null,
-    regularMarketVolume: null,
-    _note: 'Cotação USD/BRL spot (referência para dólar futuro)',
+// Fetch USD/BRL via AwesomeAPI (dólar futuro referência)
+async function fetchUsd(ticker){
+  const res=await fetch('https://economia.awesomeapi.com.br/json/USD-BRL/1');
+  if(!res.ok)throw new Error('AwesomeAPI '+res.status);
+  const d=await res.json();
+  const q=d[0];
+  if(!q)throw new Error('Sem dados USD');
+  const price=parseFloat(q.bid),prev=parseFloat(q.open)||price;
+  const chgAbs=price-prev,chgPct=prev?(chgAbs/prev)*100:0;
+  return{
+    symbol:ticker,
+    shortName:ticker==='DOLFUT'?'Dólar Futuro':'Mini Dólar Futuro',
+    longName:'Cotação USD/BRL (referência para dólar futuro)',
+    regularMarketPrice:price,regularMarketChange:chgAbs,regularMarketChangePercent:chgPct,
+    regularMarketPreviousClose:prev,regularMarketOpen:parseFloat(q.open)||null,
+    regularMarketDayHigh:parseFloat(q.high)||null,regularMarketDayLow:parseFloat(q.low)||null,
+    regularMarketVolume:null,
+    _note:'Cotação USD/BRL spot — referência para o dólar futuro'
   };
 }
 
-// IBOVESPA via HG Brasil finance endpoint — gratuito, CORS ok
-async function fetchIbov(displayTicker){
-  const res = await fetch('https://api.hgbrasil.com/finance?format=json&key=demo&fields=only_results,ibovespa');
-  const data = await res.json();
-  const ibov = data?.results?.stocks?.IBOVESPA;
-  if(!ibov) throw new Error('Sem dados IBOVESPA HG');
-  const price  = ibov.points;
-  const prev   = ibov.points / (1 + ibov.change_percent/100);
-  const chgAbs = price - prev;
-  return {
-    symbol: displayTicker,
-    _displayTicker: displayTicker,
-    _realTicker: 'IBOVESPA',
-    _source: 'hgbrasil',
-    shortName: displayTicker === 'INDFUT' ? 'Índice Futuro (ref. IBOVESPA)' : 'Mini Índice Futuro (ref. IBOVESPA)',
-    longName: 'Referência: Ibovespa à vista',
-    regularMarketPrice: price,
-    regularMarketChange: chgAbs,
-    regularMarketChangePercent: ibov.change_percent,
-    regularMarketPreviousClose: prev,
-    regularMarketOpen: null,
-    regularMarketDayHigh: null,
-    regularMarketDayLow: null,
-    regularMarketVolume: ibov.volume || null,
-    _note: 'Pontuação do Ibovespa à vista (referência para mini índice futuro)',
+// Fetch IBOV via brapi (mini índice referência)
+async function fetchIbov(ticker){
+  const res=await fetch(`https://brapi.dev/api/quote/%5EBVSP?token=${TOKEN}&fundamental=false&dividends=false`);
+  const d=await res.json();
+  if(!res.ok)throw new Error('brapi IBOV '+res.status);
+  const r=d.results&&d.results[0];
+  if(!r)throw new Error('Sem dados IBOV');
+  return{
+    symbol:ticker,
+    shortName:ticker==='INDFUT'?'Índice Futuro':'Mini Índice Futuro',
+    longName:'IBOVESPA à vista (referência para mini índice futuro)',
+    regularMarketPrice:r.regularMarketPrice,regularMarketChange:r.regularMarketChange,
+    regularMarketChangePercent:r.regularMarketChangePercent,
+    regularMarketPreviousClose:r.regularMarketPreviousClose,
+    regularMarketOpen:r.regularMarketOpen||null,regularMarketDayHigh:r.regularMarketDayHigh||null,
+    regularMarketDayLow:r.regularMarketDayLow||null,regularMarketVolume:r.regularMarketVolume||null,
+    _note:'Pontuação do Ibovespa à vista — referência para o mini índice futuro'
   };
 }
 
-async function fetchOneTicker(ticker){
-  // Futuros: usa fontes alternativas gratuitas
-  if(FUTURE_MAP_TYPE[ticker]){
-    try {
-      if(FUTURE_MAP_TYPE[ticker] === 'usd') return await fetchUsdBrl(ticker);
-      if(FUTURE_MAP_TYPE[ticker] === 'ibov') return await fetchIbov(ticker);
-    } catch(e) {
-      console.warn('Erro futuro', ticker, e.message);
-      return null;
-    }
+// Fetch one ticker
+async function fetchOne(ticker,type){
+  if(type==='futuro'){
+    const kind=FUTURES[ticker];
+    if(kind==='usd') return await fetchUsd(ticker);
+    if(kind==='ibov') return await fetchIbov(ticker);
   }
-  // Ações/FIIs: brapi
-  const url = `https://brapi.dev/api/quote/${ticker}?token=${TOKEN}&fundamental=false&dividends=false`;
-  const res = await fetch(url);
-  const data = await res.json();
-  if(!res.ok) throw new Error(data.message || data.error || 'HTTP ' + res.status);
-  if(data.error) throw new Error(data.message || data.error);
-  const result = (data.results && data.results[0]) || null;
-  if(result) result._displayTicker = ticker;
-  return result;
+  return await fetchAcao(ticker);
 }
 
-async function fetchQuotes(tickers){
-  const results = [];
-  for(const ticker of tickers){
-    try{
-      const r = await fetchOneTicker(ticker);
-      if(r) results.push(r);
-    } catch(e){
-      console.warn(`Erro ao buscar ${ticker}:`, e.message);
-    }
-    // pequena pausa para não sobrecarregar a API
-    await new Promise(res => setTimeout(res, 300));
-  }
-  return results;
-}
-
-async function loadSummary(){
-  try{
-    const tickers=['WINFUT','WDOFUT','DOLFUT'];
-    const results = await fetchQuotes(tickers);
-    const bar = document.getElementById('summaryBar');
-    const labels = {'WINFUT':'WINFUT','WDOFUT':'WDOFUT','DOLFUT':'DOLFUT'};
-    bar.innerHTML = tickers.map(t=>{
-      const r = results.find(x=>(x._displayTicker||x.symbol)===t);
-      const price = r ? fmtPrice(r.regularMarketPrice, t) : '—';
-      const chg   = r ? r.regularMarketChangePercent : null;
-      const cc    = chgClass(chg);
-      const realCode = r ? (r._realTicker || r.symbol) : resolveTickerReal(t);
-      return `<div class="summary-item">
-        <span class="summary-ticker">${labels[t]}</span>
-        <span style="font-size:9px;color:var(--text3);font-family:var(--mono);margin-bottom:1px;">${realCode}</span>
-        <span class="summary-price">${price}</span>
-        <span class="summary-chg ${cc}">${fmtChg(chg)}</span>
-      </div>`;
-    }).join('');
-  }catch(e){console.warn('Summary error',e);}
-}
-
-async function loadWatchlist(){
-  if(!watchlist.length)return;
+// Load all watchlist
+async function loadAll(){
   const btn=document.getElementById('refreshBtn');
   btn.classList.add('spinning');
-  try{
-    const tickers = watchlist.map(w=>w.ticker);
-    const results = await fetchQuotes(tickers);
-    if(!results.length) throw new Error('Nenhum resultado retornado');
-    results.forEach(r=>{
-      // Usa _displayTicker para futuros (WINFUT) mas armazena dados do contrato real
-      const key = r._displayTicker || r.symbol;
-      priceCache[key] = r;
-    });
-    document.getElementById('lastUpdate').textContent = now();
-    snack('Cotações atualizadas ✓');
-  }catch(e){
-    console.error('loadWatchlist error:', e);
-    const msg = e.message || '';
-    if(msg.includes('401') || msg.includes('token') || msg.includes('authen')){
-      snack('Token inválido — verifique sua conta brapi.dev', 4000);
-    } else if(msg.includes('429')){
-      snack('Limite de requisições atingido. Aguarde 1 minuto.', 4000);
-    } else {
-      snack('Erro ao buscar cotações: ' + (msg||'sem conexão'), 4000);
-    }
-  }finally{
-    btn.classList.remove('spinning');
-    render();
+  let ok=0,fail=0;
+  for(const w of watchlist){
+    try{const r=await fetchOne(w.ticker,w.type);if(r){cache[w.ticker]=r;ok++;}}
+    catch(e){console.warn(w.ticker,e.message);fail++;}
+    await sleep(400);
   }
+  document.getElementById('lastUpdate').textContent=now();
+  btn.classList.remove('spinning');
+  render();
+  snack(fail>0?`${ok} atualizados, ${fail} falharam`:`Cotações atualizadas ✓`);
 }
 
-// ── RENDER ──
-function render(){
-  const area = document.getElementById('listArea');
-  const filtered = currentFilter==='all' ? watchlist : watchlist.filter(w=>w.type===currentFilter);
+// Load summary bar
+async function loadSummary(){
+  // USD/BRL
+  try{
+    const res=await fetch('https://economia.awesomeapi.com.br/json/USD-BRL/1');
+    const d=await res.json();const q=d[0];
+    if(q){
+      const v=parseFloat(q.bid),prev=parseFloat(q.open)||v;
+      const chgPct=prev?((v-prev)/prev*100):0;
+      document.getElementById('s0').textContent='R$ '+v.toFixed(4);
+      const el=document.getElementById('s0c');el.textContent=fmtChg(chgPct);el.className='sum-chg '+cc(chgPct);
+    }
+  }catch(e){}
+  // IBOV
+  try{
+    await sleep(400);
+    const res=await fetch(`https://brapi.dev/api/quote/%5EBVSP?token=${TOKEN}&fundamental=false&dividends=false`);
+    const d=await res.json();const r=d.results&&d.results[0];
+    if(r){
+      document.getElementById('s1').textContent=fmt(r.regularMarketPrice);
+      const el=document.getElementById('s1c');el.textContent=fmtChg(r.regularMarketChangePercent);el.className='sum-chg '+cc(r.regularMarketChangePercent);
+    }
+  }catch(e){}
+  // PETR4
+  try{
+    await sleep(400);
+    const res=await fetch(`https://brapi.dev/api/quote/PETR4?token=${TOKEN}&fundamental=false&dividends=false`);
+    const d=await res.json();const r=d.results&&d.results[0];
+    if(r){
+      document.getElementById('s2').textContent='R$ '+fmt(r.regularMarketPrice,'PETR4');
+      const el=document.getElementById('s2c');el.textContent=fmtChg(r.regularMarketChangePercent);el.className='sum-chg '+cc(r.regularMarketChangePercent);
+    }
+  }catch(e){}
+  // VALE3
+  try{
+    await sleep(400);
+    const res=await fetch(`https://brapi.dev/api/quote/VALE3?token=${TOKEN}&fundamental=false&dividends=false`);
+    const d=await res.json();const r=d.results&&d.results[0];
+    if(r){
+      document.getElementById('s3').textContent='R$ '+fmt(r.regularMarketPrice,'VALE3');
+      const el=document.getElementById('s3c');el.textContent=fmtChg(r.regularMarketChangePercent);el.className='sum-chg '+cc(r.regularMarketChangePercent);
+    }
+  }catch(e){}
+}
 
-  if(filtered.length===0){
-    const msgs={
-      all:['📊','Watchlist vazia','Digite um ticker acima e clique em Adicionar.\nEx: PETR4, WINFUT, VALE3'],
-      acao:['📈','Nenhuma ação','Adicione ações como PETR4, VALE3, ITUB4'],
-      futuro:['⚡','Nenhum contrato futuro','Adicione WINFUT, WDOFUT ou DOLFUT'],
-    };
-    const[ic,t,s]=msgs[currentFilter];
+// Render
+function render(){
+  const area=document.getElementById('listArea');
+  const list=filter==='all'?watchlist:watchlist.filter(w=>w.type===filter);
+  if(!list.length){
+    const msgs={all:['📊','Watchlist vazia','Adicione ativos acima'],acao:['📈','Sem ações','Adicione PETR4, VALE3...'],futuro:['⚡','Sem futuros','Adicione WINFUT ou WDOFUT']};
+    const[ic,t,s]=msgs[filter];
     area.innerHTML=`<div class="empty-state"><div class="empty-icon">${ic}</div><div class="empty-title">${t}</div><div class="empty-sub">${s}</div></div>`;
     return;
   }
-
   area.innerHTML='';
-  filtered.forEach(w=>{
-    const r = priceCache[w.ticker];
-    area.appendChild(makeCard(w,r));
-  });
+  list.forEach(w=>area.appendChild(makeCard(w)));
 }
 
-function makeCard(w,r){
-  const card = document.createElement('div');
-  card.className='asset-card';
-  const isOpen = openCards.has(w.ticker);
+function makeCard(w){
+  const r=cache[w.ticker];
+  const isOpen=openCards.has(w.ticker);
+  const price=r?r.regularMarketPrice:null;
+  const chgPct=r?r.regularMarketChangePercent:null;
+  const chgAbs=r?r.regularMarketChange:null;
+  const name=r?(r.shortName||r.longName||w.ticker):(SUGS.find(s=>s.ticker===w.ticker)?.name||w.ticker);
+  const tagCls=w.type==='futuro'?'tag-futuro':'tag-acao';
+  const tagLbl=w.type==='futuro'?'FUTURO':'AÇÃO';
+  const badgeCls=r?('badge-'+cc(chgPct)):'badge-load';
+  const accentColor=r?(chgPct>0?'var(--green)':chgPct<0?'var(--red)':'var(--border2)'):'var(--border2)';
 
-  const price  = r ? fmtPrice(r.regularMarketPrice, w.ticker) : '—';
-  const chgPct = r ? r.regularMarketChangePercent : null;
-  const chgAbs = r ? r.regularMarketChange : null;
-  const cc     = chgClass(chgPct);
-  const sugInfo = SUGGESTIONS_DB.find(s=>s.ticker===w.ticker);
-  const realCode = w.type==='futuro' ? resolveTickerReal(w.ticker) : null;
-  const name   = (r?.longName || r?.shortName || sugInfo?.name || w.ticker) + (realCode && realCode!==w.ticker ? ` · ${realCode}` : '');
-  const tag    = w.type==='futuro' ? 'tag-futuro' : 'tag-acao';
-  const tagLabel = w.type==='futuro' ? 'FUTURO' : 'AÇÃO';
-
-  const loadingClass = r ? '' : 'loading';
-
-  card.innerHTML=`
-    <div class="card-main">
-      <div class="card-left">
-        <div class="card-top">
-          <span class="asset-ticker">${w.ticker}</span>
-          <span class="asset-type-tag ${tag}">${tagLabel}</span>
-        </div>
-        <div class="asset-name">${name}</div>
-      </div>
-      <div class="card-right">
-        <span class="asset-price ${loadingClass}">${r ? (
-        r._source==='awesomeapi' ? 'R$ '+price+'/USD' :
-        r._source==='hgbrasil'  ? price+' pts' :
-        'R$ '+price
-      ) : 'Carregando...'}</span>
-        <span class="chg-badge ${r?cc:'loading'}">${r?fmtChg(chgPct):'...'}</span>
-      </div>
-    </div>
-    ${r?`
-    <div class="card-detail ${isOpen?'open':''}">
-      <div class="detail-item"><span class="detail-label">Abertura</span><span class="detail-value">R$ ${fmtPrice(r.regularMarketOpen,w.ticker)}</span></div>
-      <div class="detail-item"><span class="detail-label">Máxima</span><span class="detail-value up">R$ ${fmtPrice(r.regularMarketDayHigh,w.ticker)}</span></div>
-      <div class="detail-item"><span class="detail-label">Mínima</span><span class="detail-value down">R$ ${fmtPrice(r.regularMarketDayLow,w.ticker)}</span></div>
-      <div class="detail-item"><span class="detail-label">Variação</span><span class="detail-value ${cc}">${chgAbs!=null?(chgAbs>=0?'+':'')+fmtPrice(chgAbs,w.ticker):'—'}</span></div>
-      <div class="detail-item"><span class="detail-label">Volume</span><span class="detail-value">${fmtVol(r.regularMarketVolume)}</span></div>
-      ${r._note ? `<div class="detail-item" style="grid-column:1/-1"><span class="detail-label">Fonte</span><span class="detail-value" style="font-size:10px;color:var(--text3)">${r._note}</span></div>` : ''}
-      <div class="detail-item"><span class="detail-label">Fechamento</span><span class="detail-value">R$ ${fmtPrice(r.regularMarketPreviousClose,w.ticker)}</span></div>
-    </div>
-    <div class="card-footer">
-      <button class="btn-detail ${isOpen?'open':''}" data-ticker="${w.ticker}">
-        ${isOpen?'Ocultar detalhes':'Ver detalhes'}
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,4 6,8 10,4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-      <button class="btn-remove" data-ticker="${w.ticker}">Remover</button>
-    </div>
-    `:`<div class="card-footer">
-      <span style="font-size:11px;color:var(--text3);font-family:var(--mono);">Atualizando...</span>
-      <button class="btn-remove" data-ticker="${w.ticker}">Remover</button>
-    </div>`}
-  `;
-
-  // events
-  card.querySelector('.btn-remove').addEventListener('click',e=>{
-    e.stopPropagation();
-    watchlist=watchlist.filter(x=>x.ticker!==w.ticker);
-    delete priceCache[w.ticker];
-    openCards.delete(w.ticker);
-    save(); render();
-    snack(`${w.ticker} removido da watchlist`);
-  });
-  const detBtn=card.querySelector('.btn-detail');
-  if(detBtn){
-    detBtn.addEventListener('click',e=>{
-      e.stopPropagation();
-      if(openCards.has(w.ticker)) openCards.delete(w.ticker);
-      else openCards.add(w.ticker);
-      render();
-    });
+  let priceLabel='Carregando...';
+  if(r){
+    if(w.ticker==='WDOFUT'||w.ticker==='DOLFUT') priceLabel='R$ '+fmt(price,w.ticker)+'/USD';
+    else if(w.ticker==='WINFUT'||w.ticker==='INDFUT') priceLabel=fmt(price,w.ticker)+' pts';
+    else priceLabel='R$ '+fmt(price,w.ticker);
   }
+
+  const card=document.createElement('div');
+  card.className='card';
+  card.innerHTML=`
+<div class="card-inner">
+  <div class="card-accent" style="background:${accentColor};"></div>
+  <div class="card-main">
+    <div class="card-left">
+      <div class="card-top">
+        <span class="card-ticker">${w.ticker}</span>
+        <span class="card-tag ${tagCls}">${tagLbl}</span>
+      </div>
+      <div class="card-name">${name}</div>
+    </div>
+    <div class="card-right">
+      <span class="card-price ${r?'':'loading'}">${priceLabel}</span>
+      <span class="card-badge ${badgeCls}">${r?fmtChg(chgPct):'...'}</span>
+    </div>
+  </div>
+</div>
+${r?`
+<div class="card-detail ${isOpen?'open':''}">
+  <div><div class="det-label">Abertura</div><div class="det-value">${r.regularMarketOpen!=null?fmt(r.regularMarketOpen,w.ticker):'—'}</div></div>
+  <div><div class="det-label">Máxima</div><div class="det-value up">${r.regularMarketDayHigh!=null?fmt(r.regularMarketDayHigh,w.ticker):'—'}</div></div>
+  <div><div class="det-label">Mínima</div><div class="det-value down">${r.regularMarketDayLow!=null?fmt(r.regularMarketDayLow,w.ticker):'—'}</div></div>
+  <div><div class="det-label">Variação</div><div class="det-value ${cc(chgAbs)}">${chgAbs!=null?(chgAbs>=0?'+':'')+fmt(chgAbs,w.ticker):'—'}</div></div>
+  <div><div class="det-label">Volume</div><div class="det-value">${fmtVol(r.regularMarketVolume)}</div></div>
+  <div><div class="det-label">Fechamento</div><div class="det-value">${r.regularMarketPreviousClose!=null?fmt(r.regularMarketPreviousClose,w.ticker):'—'}</div></div>
+  ${r._note?`<div class="det-note">${r._note}</div>`:''}
+</div>
+<div class="card-footer">
+  <button class="btn-det ${isOpen?'open':''}">
+    ${isOpen?'Ocultar':'Detalhes'}
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><polyline points="2,4 6,8 10,4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <button class="btn-rem">Remover</button>
+</div>`:`
+<div class="card-footer">
+  <span style="font-size:11px;color:var(--text3);font-family:var(--mono);">Aguardando dados...</span>
+  <button class="btn-rem">Remover</button>
+</div>`}`;
+
+  card.querySelector('.btn-rem').addEventListener('click',()=>{
+    watchlist=watchlist.filter(x=>x.ticker!==w.ticker);
+    delete cache[w.ticker];openCards.delete(w.ticker);
+    save();render();snack(`${w.ticker} removido`);
+  });
+  const db=card.querySelector('.btn-det');
+  if(db)db.addEventListener('click',()=>{
+    if(openCards.has(w.ticker))openCards.delete(w.ticker);else openCards.add(w.ticker);
+    render();
+  });
   return card;
 }
 
-// ── ADD TICKER ──
-async function addTicker(ticker, type){
-  ticker = ticker.toUpperCase().trim();
-  if(!ticker){snack('Digite um ticker válido');return;}
-  if(watchlist.find(w=>w.ticker===ticker)){snack(`${ticker} já está na watchlist`);return;}
-
-  // detect type
-  const futures = ['WIN','WDO','DOL','IND','BGI','CCM','ICF','ISP'];
-  const isFut = type==='futuro' || futures.some(f=>ticker.startsWith(f)&&ticker.endsWith('FUT'));
-  const finalType = isFut ? 'futuro' : (type||'acao');
-
-  watchlist.push({ticker, type:finalType});
-  save();
-
+// Add ticker
+async function addTicker(raw,typeHint){
+  const ticker=raw.toUpperCase().trim();
+  if(!ticker){snack('Digite um ticker');return;}
+  if(watchlist.find(w=>w.ticker===ticker)){snack(`${ticker} já está na lista`);return;}
+  const type=typeHint||(FUTURES[ticker]?'futuro':'acao');
+  watchlist.push({ticker,type});save();
   document.getElementById('searchInput').value='';
   document.getElementById('suggestions').classList.remove('show');
-  render();
-  snack(`Buscando ${ticker}...`);
-
+  render();snack(`Buscando ${ticker}...`);
   try{
-    const results = await fetchQuotes([ticker]);
-    if(results.length&&results[0].symbol){
-      priceCache[ticker]=results[0];
-      render();
-      snack(`${ticker} adicionado ✓`);
-    } else {
-      watchlist=watchlist.filter(w=>w.ticker!==ticker);
-      save(); render();
-      snack(`${ticker} não encontrado na B3`);
-    }
-  }catch(e){
-    watchlist=watchlist.filter(w=>w.ticker!==ticker);
-    save(); render();
-    snack('Erro ao buscar ticker');
-  }
+    const r=await fetchOne(ticker,type);
+    if(r){cache[ticker]=r;render();snack(`${ticker} adicionado ✓`);}
+    else{watchlist=watchlist.filter(w=>w.ticker!==ticker);save();render();snack(`${ticker} não encontrado`);}
+  }catch(e){watchlist=watchlist.filter(w=>w.ticker!==ticker);save();render();snack(`Erro: ${e.message}`);}
 }
 
-// ── SUGGESTIONS ──
-function showSuggestions(q){
-  const box = document.getElementById('suggestions');
+// Suggestions
+function showSug(q){
+  const box=document.getElementById('suggestions');
   if(!q){box.classList.remove('show');return;}
-  const matches = SUGGESTIONS_DB.filter(s=>
-    s.ticker.startsWith(q) || s.name.toLowerCase().includes(q.toLowerCase())
-  ).slice(0,5);
-  if(!matches.length){box.classList.remove('show');return;}
-  box.innerHTML = matches.map(s=>`
-    <div class="suggestion-item" data-ticker="${s.ticker}" data-type="${s.type}">
-      <div class="sug-left">
-        <span class="sug-ticker">${s.ticker}</span>
-        <span class="sug-name">${s.name}</span>
-      </div>
-      <span class="sug-tag">${s.type==='futuro'?'FUTURO':'AÇÃO'}</span>
-    </div>
-  `).join('');
+  const hits=SUGS.filter(s=>s.ticker.startsWith(q)||s.name.toLowerCase().includes(q.toLowerCase())).slice(0,5);
+  if(!hits.length){box.classList.remove('show');return;}
+  box.innerHTML=hits.map(s=>`<div class="sug-item" data-t="${s.ticker}" data-type="${s.type}"><div><div class="sug-ticker">${s.ticker}</div><div class="sug-name">${s.name}</div></div><span class="sug-tag ${s.type==='futuro'?'tag-futuro':'tag-acao'}">${s.type==='futuro'?'FUTURO':'AÇÃO'}</span></div>`).join('');
   box.classList.add('show');
-  box.querySelectorAll('.suggestion-item').forEach(el=>{
-    el.addEventListener('click',()=>{
-      addTicker(el.dataset.ticker, el.dataset.type);
-      box.classList.remove('show');
-    });
-  });
+  box.querySelectorAll('.sug-item').forEach(el=>el.addEventListener('click',()=>addTicker(el.dataset.t,el.dataset.type)));
 }
 
-// ── EVENTS ──
-document.getElementById('searchInput').addEventListener('input',e=>{
-  showSuggestions(e.target.value.toUpperCase());
-});
-document.getElementById('searchInput').addEventListener('keydown',e=>{
-  if(e.key==='Enter') addTicker(e.target.value);
-});
-document.getElementById('addBtn').addEventListener('click',()=>{
-  addTicker(document.getElementById('searchInput').value);
-});
-document.getElementById('refreshBtn').addEventListener('click',()=>{
-  loadSummary();
-  loadWatchlist();
-});
-document.querySelectorAll('.tab').forEach(t=>{
-  t.addEventListener('click',()=>{
-    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-    t.classList.add('active');
-    currentFilter=t.dataset.filter;
-    render();
-  });
-});
+// Events
+document.getElementById('searchInput').addEventListener('input',e=>showSug(e.target.value.toUpperCase()));
+document.getElementById('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')addTicker(e.target.value);});
+document.getElementById('addBtn').addEventListener('click',()=>addTicker(document.getElementById('searchInput').value));
+document.getElementById('refreshBtn').addEventListener('click',()=>{loadSummary();loadAll();});
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');filter=t.dataset.filter;render();
+}));
 document.addEventListener('click',e=>{
   if(!e.target.closest('#suggestions')&&!e.target.closest('.search-row'))
     document.getElementById('suggestions').classList.remove('show');
 });
 
-// ── AUTO REFRESH every 60s ──
-function startAutoRefresh(){
-  clearInterval(refreshInterval);
-  refreshInterval = setInterval(()=>{
-    loadSummary();
-    loadWatchlist();
-  }, 180000); // 3 min (plano gratuito: 1 ativo/req)
-}
-
-// ── INIT ──
+// Init
 render();
 loadSummary();
-loadWatchlist();
-startAutoRefresh();
+loadAll();
+setInterval(()=>{loadSummary();loadAll();},180000);
 </script>
 </body>
 </html>
