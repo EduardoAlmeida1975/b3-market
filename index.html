@@ -382,6 +382,41 @@ if('serviceWorker' in navigator){
 const TOKEN = 'uKiNpAT6kwMvMDRhEKGFK5';
 const BASE  = 'https://brapi.dev/api';
 
+// Mapa de contratos futuros: vencimento rotativo mensal
+// Letras: F=Jan G=Feb H=Mar J=Apr K=May M=Jun N=Jul Q=Aug U=Sep V=Oct X=Nov Z=Dec
+const MONTH_CODES = ['F','G','H','J','K','M','N','Q','U','V','X','Z'];
+function getFutureCode(prefix){
+  const now = new Date();
+  let m = now.getMonth(); // 0-based
+  let y = now.getFullYear() % 100;
+  // contratos vencem na 3ª quarta-feira — se já passou, pula pro próximo mês
+  const thirdWed = nthWeekday(now.getFullYear(), now.getMonth(), 3, 3);
+  if(now >= thirdWed){ m++; if(m>11){m=0;y++;} }
+  return prefix + MONTH_CODES[m] + String(y).padStart(2,'0');
+}
+function nthWeekday(year, month, weekday, n){
+  const d = new Date(year, month, 1);
+  let count = 0;
+  while(true){
+    if(d.getDay() === weekday){ count++; if(count===n) return new Date(d); }
+    d.setDate(d.getDate()+1);
+  }
+}
+
+// Tickers reais de futuros com vencimento atual
+const FUTURE_MAP = {
+  'WINFUT': () => getFutureCode('WIN'),  // Mini Índice
+  'WDOFUT': () => getFutureCode('WDO'),  // Mini Dólar
+  'DOLFUT': () => getFutureCode('DOL'),  // Dólar Cheio
+  'INDFUT': () => getFutureCode('IND'),  // Índice Cheio
+};
+
+// Resolve ticker real (ex: WINFUT → WINH26)
+function resolveTickerReal(ticker){
+  if(FUTURE_MAP[ticker]) return FUTURE_MAP[ticker]();
+  return ticker;
+}
+
 // Sugestões de ativos populares
 const SUGGESTIONS_DB = [
   // Ações
@@ -411,12 +446,11 @@ const SUGGESTIONS_DB = [
   {ticker:'TAEE11',name:'Taesa UNT',type:'acao'},
   {ticker:'PRIO3',name:'PetroRio ON',type:'acao'},
   {ticker:'RADL3',name:'Raia Drogasil ON',type:'acao'},
-  // Mercado Futuro
-  {ticker:'WINFUT',name:'Mini Índice Futuro',type:'futuro'},
-  {ticker:'WDOFUT',name:'Mini Dólar Futuro',type:'futuro'},
-  {ticker:'DOLFUT',name:'Dólar Futuro',type:'futuro'},
-  {ticker:'INDFUT',name:'Índice Futuro (IBOVESPA)',type:'futuro'},
-  {ticker:'BVMF:WINFUT',name:'Mini Índice (Google)',type:'futuro'},
+  // Mercado Futuro (tickers genéricos — o app resolve o contrato atual automaticamente)
+  {ticker:'WINFUT',name:'Mini Índice Futuro (WIN)',type:'futuro'},
+  {ticker:'WDOFUT',name:'Mini Dólar Futuro (WDO)',type:'futuro'},
+  {ticker:'DOLFUT',name:'Dólar Cheio Futuro (DOL)',type:'futuro'},
+  {ticker:'INDFUT',name:'Índice Cheio Futuro (IND)',type:'futuro'},
   // Índices
   {ticker:'^BVSP',name:'IBOVESPA',type:'acao'},
 ];
@@ -465,12 +499,20 @@ function now(){return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minu
 // ── FETCH QUOTES ──
 // Plano gratuito brapi: 1 ativo por requisição
 async function fetchOneTicker(ticker){
-  const url = `https://brapi.dev/api/quote/${ticker}?token=${TOKEN}&fundamental=false&dividends=false`;
+  // Resolve ticker real para futuros (ex: WINFUT → WINH26)
+  const realTicker = resolveTickerReal(ticker);
+  const url = `https://brapi.dev/api/quote/${realTicker}?token=${TOKEN}&fundamental=false&dividends=false`;
   const res = await fetch(url);
   const data = await res.json();
   if(!res.ok) throw new Error(data.message || data.error || 'HTTP ' + res.status);
   if(data.error) throw new Error(data.message || data.error);
-  return (data.results && data.results[0]) || null;
+  const result = (data.results && data.results[0]) || null;
+  // Normaliza: mantém o ticker original (WINFUT) mas usa dados do contrato real
+  if(result){
+    result._displayTicker = ticker;
+    result._realTicker = realTicker;
+  }
+  return result;
 }
 
 async function fetchQuotes(tickers){
@@ -495,12 +537,14 @@ async function loadSummary(){
     const bar = document.getElementById('summaryBar');
     const labels = {'WINFUT':'WINFUT','WDOFUT':'WDOFUT','DOLFUT':'DOLFUT'};
     bar.innerHTML = tickers.map(t=>{
-      const r = results.find(x=>x.symbol===t);
+      const r = results.find(x=>(x._displayTicker||x.symbol)===t);
       const price = r ? fmtPrice(r.regularMarketPrice, t) : '—';
       const chg   = r ? r.regularMarketChangePercent : null;
       const cc    = chgClass(chg);
+      const realCode = r ? (r._realTicker || r.symbol) : resolveTickerReal(t);
       return `<div class="summary-item">
         <span class="summary-ticker">${labels[t]}</span>
+        <span style="font-size:9px;color:var(--text3);font-family:var(--mono);margin-bottom:1px;">${realCode}</span>
         <span class="summary-price">${price}</span>
         <span class="summary-chg ${cc}">${fmtChg(chg)}</span>
       </div>`;
@@ -517,11 +561,9 @@ async function loadWatchlist(){
     const results = await fetchQuotes(tickers);
     if(!results.length) throw new Error('Nenhum resultado retornado');
     results.forEach(r=>{
-      // brapi pode retornar symbol diferente do ticker solicitado
-      priceCache[r.symbol]=r;
-      // tenta mapear de volta ao ticker original
-      const orig = watchlist.find(w=>w.ticker===r.symbol||r.symbol===w.ticker);
-      if(orig) priceCache[orig.ticker]=r;
+      // Usa _displayTicker para futuros (WINFUT) mas armazena dados do contrato real
+      const key = r._displayTicker || r.symbol;
+      priceCache[key] = r;
     });
     document.getElementById('lastUpdate').textContent = now();
     snack('Cotações atualizadas ✓');
@@ -574,7 +616,8 @@ function makeCard(w,r){
   const chgAbs = r ? r.regularMarketChange : null;
   const cc     = chgClass(chgPct);
   const sugInfo = SUGGESTIONS_DB.find(s=>s.ticker===w.ticker);
-  const name   = r?.longName || r?.shortName || sugInfo?.name || w.ticker;
+  const realCode = w.type==='futuro' ? resolveTickerReal(w.ticker) : null;
+  const name   = (r?.longName || r?.shortName || sugInfo?.name || w.ticker) + (realCode && realCode!==w.ticker ? ` · ${realCode}` : '');
   const tag    = w.type==='futuro' ? 'tag-futuro' : 'tag-acao';
   const tagLabel = w.type==='futuro' ? 'FUTURO' : 'AÇÃO';
 
