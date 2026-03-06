@@ -302,6 +302,19 @@ canvas.sparkline{width:100%;height:40px;display:block;}
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+
+/* ── DEBUG PANEL ── */
+.debug-panel{
+  margin:10px 20px 0;
+  background:rgba(255,179,0,0.06);border:1px solid rgba(255,179,0,0.2);border-radius:var(--r);
+  padding:10px 14px;font-family:var(--mono);font-size:11px;color:var(--amber);
+  display:none;
+}
+.debug-panel.show{display:block;}
+.debug-line{margin-bottom:3px;color:var(--text2);}
+.debug-line span{color:var(--amber);}
+.debug-line.ok span{color:var(--green);}
+.debug-line.err span{color:var(--red);}
 </style>
 </head>
 <body>
@@ -332,6 +345,14 @@ canvas.sparkline{width:100%;height:40px;display:block;}
   <div class="summary-item"><span class="summary-ticker">WINFUT</span><span class="summary-price skeleton" style="width:60px;height:13px;display:inline-block;">&nbsp;</span><span class="summary-chg flat">—</span></div>
   <div class="summary-item"><span class="summary-ticker">WDOFUT</span><span class="summary-price skeleton" style="width:60px;height:13px;display:inline-block;">&nbsp;</span><span class="summary-chg flat">—</span></div>
   <div class="summary-item"><span class="summary-ticker">DOLFUT</span><span class="summary-price skeleton" style="width:60px;height:13px;display:inline-block;">&nbsp;</span><span class="summary-chg flat">—</span></div>
+</div>
+
+
+<!-- DEBUG PANEL -->
+<div class="debug-panel" id="debugPanel">
+  <div class="debug-line">Token: <span id="dbToken">—</span></div>
+  <div class="debug-line" id="dbStatusLine">Status API: <span id="dbStatus">—</span></div>
+  <div class="debug-line" id="dbResultLine">Resultado: <span id="dbResult">—</span></div>
 </div>
 
 <!-- SEARCH -->
@@ -459,13 +480,54 @@ function chgClass(v){return v>0?'up':v<0?'down':'flat';}
 function now(){return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
 
 // ── FETCH QUOTES ──
+function debugShow(token, status, statusClass, result){
+  const p = document.getElementById('debugPanel');
+  if(p){
+    p.classList.add('show');
+    document.getElementById('dbToken').textContent = token ? token.slice(0,6)+'...' : 'ausente';
+    const sl = document.getElementById('dbStatusLine');
+    sl.className = 'debug-line ' + (statusClass||'');
+    document.getElementById('dbStatus').textContent = status;
+    document.getElementById('dbResult').textContent = result;
+  }
+}
+
 async function fetchQuotes(tickers){
   const joined = tickers.join(',');
-  const url = `${BASE}/quote/${joined}?token=${TOKEN}&fundamental=false&dividends=false`;
-  const res = await fetch(url);
-  if(!res.ok) throw new Error('Erro '+res.status);
-  const data = await res.json();
-  return data.results || [];
+  const urlAuth = `${BASE}/quote/${joined}?fundamental=false&dividends=false`;
+  const urlToken = `${BASE}/quote/${joined}?token=${TOKEN}&fundamental=false&dividends=false`;
+
+  debugShow(TOKEN, 'Conectando...', '', '...');
+
+  // Tenta com Authorization header
+  try {
+    const res = await fetch(urlAuth, { headers: { 'Authorization': `Bearer ${TOKEN}` } });
+    const data = await res.json();
+    if(res.ok && data.results && data.results.length){
+      debugShow(TOKEN, `HTTP ${res.status} OK (Bearer header)`, 'ok', `${data.results.length} ativo(s) retornado(s)`);
+      return data.results;
+    }
+    debugShow(TOKEN, `HTTP ${res.status} - ${data.message||data.error||'sem resultados'}`, 'err', 'Tentando fallback...');
+  } catch(e){
+    debugShow(TOKEN, 'Auth header falhou (CORS?)', 'err', 'Tentando token na URL...');
+    console.warn('Auth header falhou:', e);
+  }
+
+  // Fallback: token na URL
+  try {
+    const res2 = await fetch(urlToken);
+    const data2 = await res2.json();
+    if(res2.ok && data2.results && data2.results.length){
+      debugShow(TOKEN, `HTTP ${res2.status} OK (token URL)`, 'ok', `${data2.results.length} ativo(s) retornado(s)`);
+      return data2.results;
+    }
+    const errMsg = data2.message || data2.error || `HTTP ${res2.status}`;
+    debugShow(TOKEN, errMsg, 'err', 'Verifique o token e o plano da brapi');
+    throw new Error(errMsg);
+  } catch(e){
+    debugShow(TOKEN, e.message, 'err', 'Falha total na API');
+    throw e;
+  }
 }
 
 async function loadSummary(){
@@ -495,10 +557,19 @@ async function loadWatchlist(){
   try{
     const tickers = watchlist.map(w=>w.ticker);
     const results = await fetchQuotes(tickers);
-    results.forEach(r=>{priceCache[r.symbol]=r;});
+    if(!results.length) throw new Error('Nenhum resultado retornado');
+    results.forEach(r=>{
+      // brapi pode retornar symbol diferente do ticker solicitado
+      priceCache[r.symbol]=r;
+      // tenta mapear de volta ao ticker original
+      const orig = watchlist.find(w=>w.ticker===r.symbol||r.symbol===w.ticker);
+      if(orig) priceCache[orig.ticker]=r;
+    });
     document.getElementById('lastUpdate').textContent = now();
+    snack('Cotações atualizadas ✓');
   }catch(e){
-    snack('Erro ao buscar cotações. Verifique sua conexão.');
+    console.error('loadWatchlist error:', e);
+    snack('Erro: ' + (e.message||'Verifique sua conexão'));
   }finally{
     btn.classList.remove('spinning');
     render();
