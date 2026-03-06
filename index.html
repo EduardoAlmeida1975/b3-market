@@ -533,20 +533,77 @@ function now(){return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minu
 
 // ── FETCH QUOTES ──
 // Plano gratuito brapi: 1 ativo por requisição
+// Busca futuros via Yahoo Finance (brapi não suporta contratos futuros)
+async function fetchFuture(displayTicker){
+  const realTicker = resolveTickerReal(displayTicker);
+  // Yahoo Finance: WIN → WINJ26.SA, WDO → WDOJ26.SA etc.
+  const yahooTicker = realTicker + '.SA';
+  const proxyUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooTicker}?interval=1d&range=1d`;
+  try {
+    const res = await fetch(proxyUrl);
+    const data = await res.json();
+    const meta = data?.chart?.result?.[0]?.meta;
+    if(!meta || !meta.regularMarketPrice) throw new Error('Sem dados Yahoo');
+    return {
+      symbol: displayTicker,
+      _displayTicker: displayTicker,
+      _realTicker: realTicker,
+      _source: 'yahoo',
+      shortName: meta.shortName || displayTicker,
+      longName: meta.longName || displayTicker,
+      regularMarketPrice: meta.regularMarketPrice,
+      regularMarketChange: meta.regularMarketPrice - meta.chartPreviousClose,
+      regularMarketChangePercent: ((meta.regularMarketPrice - meta.chartPreviousClose) / meta.chartPreviousClose) * 100,
+      regularMarketPreviousClose: meta.chartPreviousClose,
+      regularMarketOpen: meta.regularMarketOpen || null,
+      regularMarketDayHigh: meta.regularMarketDayHigh || null,
+      regularMarketDayLow: meta.regularMarketDayLow || null,
+      regularMarketVolume: meta.regularMarketVolume || null,
+    };
+  } catch(e) {
+    console.warn('Yahoo falhou para', yahooTicker, e.message);
+    // Fallback: tenta sem .SA
+    try {
+      const res2 = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${realTicker}?interval=1d&range=1d`);
+      const data2 = await res2.json();
+      const meta2 = data2?.chart?.result?.[0]?.meta;
+      if(!meta2?.regularMarketPrice) throw new Error('Sem dados');
+      return {
+        symbol: displayTicker,
+        _displayTicker: displayTicker,
+        _realTicker: realTicker,
+        _source: 'yahoo',
+        shortName: meta2.shortName || displayTicker,
+        longName: meta2.longName || displayTicker,
+        regularMarketPrice: meta2.regularMarketPrice,
+        regularMarketChange: meta2.regularMarketPrice - meta2.chartPreviousClose,
+        regularMarketChangePercent: ((meta2.regularMarketPrice - meta2.chartPreviousClose) / meta2.chartPreviousClose) * 100,
+        regularMarketPreviousClose: meta2.chartPreviousClose,
+        regularMarketOpen: meta2.regularMarketOpen || null,
+        regularMarketDayHigh: meta2.regularMarketDayHigh || null,
+        regularMarketDayLow: meta2.regularMarketDayLow || null,
+        regularMarketVolume: meta2.regularMarketVolume || null,
+      };
+    } catch(e2) {
+      console.warn('Yahoo sem .SA também falhou:', e2.message);
+      return null;
+    }
+  }
+}
+
 async function fetchOneTicker(ticker){
-  // Resolve ticker real para futuros (ex: WINFUT → WINH26)
-  const realTicker = resolveTickerReal(ticker);
-  const url = `https://brapi.dev/api/quote/${realTicker}?token=${TOKEN}&fundamental=false&dividends=false`;
+  // Futuros usam Yahoo Finance
+  if(FUTURE_MAP[ticker]){
+    return await fetchFuture(ticker);
+  }
+  // Ações/FIIs usam brapi
+  const url = `https://brapi.dev/api/quote/${ticker}?token=${TOKEN}&fundamental=false&dividends=false`;
   const res = await fetch(url);
   const data = await res.json();
   if(!res.ok) throw new Error(data.message || data.error || 'HTTP ' + res.status);
   if(data.error) throw new Error(data.message || data.error);
   const result = (data.results && data.results[0]) || null;
-  // Normaliza: mantém o ticker original (WINFUT) mas usa dados do contrato real
-  if(result){
-    result._displayTicker = ticker;
-    result._realTicker = realTicker;
-  }
+  if(result) result._displayTicker = ticker;
   return result;
 }
 
