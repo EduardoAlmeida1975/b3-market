@@ -382,200 +382,85 @@ if('serviceWorker' in navigator){
 const TOKEN = 'uKiNpAT6kwMvMDRhEKGFK5';
 const BASE  = 'https://brapi.dev/api';
 
-// ── CONTRATOS FUTUROS B3 ──
-// Letras dos meses: F=Jan G=Feb H=Mar J=Apr K=May M=Jun N=Jul Q=Aug U=Sep V=Oct X=Nov Z=Dec
-const MONTH_CODES = ['F','G','H','J','K','M','N','Q','U','V','X','Z'];
+// ── FUTUROS: AwesomeAPI para câmbio + HG Finance para índice ──
+// Não existe API gratuita com CORS para WIN/WDO — usamos proxies equivalentes:
+// WDOFUT/DOLFUT → USD-BRL via AwesomeAPI (tempo real, CORS ok)
+// WINFUT/INDFUT → IBOVESPA via HG Brasil (15-45min delay)
 
-function nthWeekday(year, month, weekday, n){
-  // weekday: 0=Dom 1=Seg 2=Ter 3=Qua 4=Qui 5=Sex 6=Sab
-  const d = new Date(year, month, 1);
-  let count = 0;
-  while(true){
-    if(d.getDay() === weekday){ count++; if(count===n) return new Date(d); }
-    d.setDate(d.getDate()+1);
-  }
-}
-
-function makeCode(prefix, year, month0){
-  // month0 = 0-based month index
-  let y = year, m = month0;
-  if(m > 11){ m -= 12; y++; }
-  return prefix + MONTH_CODES[m] + String(y % 100).padStart(2,'0');
-}
-
-// WIN/IND vencem na 3ª QUARTA-FEIRA de meses PARES (fev, abr, jun, ago, out, dez)
-function getWinCode(prefix){
-  const now = new Date();
-  let year = now.getFullYear();
-  let month = now.getMonth(); // 0-based
-  for(let i = 0; i < 14; i++){
-    const m = (month + i) % 12;
-    const y = year + Math.floor((month + i) / 12);
-    if((m + 1) % 2 === 0){ // mês par (fev=1, abr=3, jun=5...)
-      const venc = nthWeekday(y, m, 3, 3); // 3ª quarta (getDay=3)
-      if(now <= venc) return makeCode(prefix, y, m);
-    }
-  }
-  return prefix + 'J26';
-}
-
-// WDO/DOL vencem na 1ª QUARTA-FEIRA de todo mês
-function getWdoCode(prefix){
-  const now = new Date();
-  let year = now.getFullYear();
-  let month = now.getMonth();
-  for(let i = 0; i < 4; i++){
-    const m = (month + i) % 12;
-    const y = year + Math.floor((month + i) / 12);
-    const venc = nthWeekday(y, m, 3, 1); // 1ª quarta
-    if(now <= venc) return makeCode(prefix, y, m);
-  }
-  return prefix + 'J26';
-}
-
-const FUTURE_MAP = {
-  'WINFUT': () => getWinCode('WIN'),
-  'INDFUT': () => getWinCode('IND'),
-  'WDOFUT': () => getWdoCode('WDO'),
-  'DOLFUT': () => getWdoCode('DOL'),
+const FUTURE_MAP_TYPE = {
+  'WINFUT': 'ibov',
+  'INDFUT': 'ibov',
+  'WDOFUT': 'usd',
+  'DOLFUT': 'usd',
 };
 
-function resolveTickerReal(ticker){
-  if(FUTURE_MAP[ticker]) return FUTURE_MAP[ticker]();
-  return ticker;
-}
-
-// Log no console para debug
-console.log('Contratos futuros resolvidos:',
-  'WINFUT→'+resolveTickerReal('WINFUT'),
-  'WDOFUT→'+resolveTickerReal('WDOFUT'),
-  'DOLFUT→'+resolveTickerReal('DOLFUT')
-);
-
-// Sugestões de ativos populares
-const SUGGESTIONS_DB = [
-  // Ações
-  {ticker:'PETR4',name:'Petrobras PN',type:'acao'},
-  {ticker:'PETR3',name:'Petrobras ON',type:'acao'},
-  {ticker:'VALE3',name:'Vale ON',type:'acao'},
-  {ticker:'ITUB4',name:'Itaú Unibanco PN',type:'acao'},
-  {ticker:'BBDC4',name:'Bradesco PN',type:'acao'},
-  {ticker:'BBAS3',name:'Banco do Brasil ON',type:'acao'},
-  {ticker:'ABEV3',name:'Ambev ON',type:'acao'},
-  {ticker:'MGLU3',name:'Magazine Luiza ON',type:'acao'},
-  {ticker:'WEGE3',name:'WEG ON',type:'acao'},
-  {ticker:'RENT3',name:'Localiza ON',type:'acao'},
-  {ticker:'SUZB3',name:'Suzano ON',type:'acao'},
-  {ticker:'RDOR3',name:'Rede D\'Or ON',type:'acao'},
-  {ticker:'HAPV3',name:'Hapvida ON',type:'acao'},
-  {ticker:'LREN3',name:'Lojas Renner ON',type:'acao'},
-  {ticker:'EMBR3',name:'Embraer ON',type:'acao'},
-  {ticker:'CSAN3',name:'Cosan ON',type:'acao'},
-  {ticker:'BPAC11',name:'BTG Pactual UNT',type:'acao'},
-  {ticker:'VBBR3',name:'Vibra Energia ON',type:'acao'},
-  {ticker:'GGBR4',name:'Gerdau PN',type:'acao'},
-  {ticker:'JBSS3',name:'JBS ON',type:'acao'},
-  {ticker:'SBSP3',name:'Sabesp ON',type:'acao'},
-  {ticker:'CPLE6',name:'Copel PNB',type:'acao'},
-  {ticker:'ELET3',name:'Eletrobras ON',type:'acao'},
-  {ticker:'TAEE11',name:'Taesa UNT',type:'acao'},
-  {ticker:'PRIO3',name:'PetroRio ON',type:'acao'},
-  {ticker:'RADL3',name:'Raia Drogasil ON',type:'acao'},
-  // Mercado Futuro (tickers genéricos — o app resolve o contrato atual automaticamente)
-  {ticker:'WINFUT',name:'Mini Índice Futuro (WIN)',type:'futuro'},
-  {ticker:'WDOFUT',name:'Mini Dólar Futuro (WDO)',type:'futuro'},
-  {ticker:'DOLFUT',name:'Dólar Cheio Futuro (DOL)',type:'futuro'},
-  {ticker:'INDFUT',name:'Índice Cheio Futuro (IND)',type:'futuro'},
-  // Índices
-  {ticker:'^BVSP',name:'IBOVESPA',type:'acao'},
-];
-
-// ── STATE ──
-let watchlist = JSON.parse(localStorage.getItem('b3_watchlist') || JSON.stringify([
-  {ticker:'PETR4',type:'acao'},{ticker:'VALE3',type:'acao'},
-  {ticker:'ITUB4',type:'acao'},{ticker:'WINFUT',type:'futuro'},
-  {ticker:'WDOFUT',type:'futuro'}
-]));
-let priceCache = {};
-let openCards = new Set();
-let currentFilter = 'all';
-let refreshInterval = null;
-
-function save(){localStorage.setItem('b3_watchlist',JSON.stringify(watchlist));}
-function snack(msg,dur=2400){
-  const el=document.getElementById('snackbar');
-  el.textContent=msg;el.classList.add('show');
-  clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),dur);
-}
-
-// ── FORMAT ──
-function fmtPrice(v,ticker){
-  if(v==null||isNaN(v))return '—';
-  if(ticker&&(ticker.includes('WIN')||ticker.includes('IND')))
-    return v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
-  if(v>1000) return v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0});
-  return v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-}
-function fmtChg(v){
-  if(v==null||isNaN(v))return '—';
-  const s=v>=0?'+':'';
-  return s+v.toFixed(2)+'%';
-}
-function fmtVol(v){
-  if(!v)return '—';
-  if(v>=1e9)return (v/1e9).toFixed(1)+'B';
-  if(v>=1e6)return (v/1e6).toFixed(1)+'M';
-  if(v>=1e3)return (v/1e3).toFixed(0)+'K';
-  return v.toString();
-}
-function chgClass(v){return v>0?'up':v<0?'down':'flat';}
-function now(){return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
-
-// ── FETCH QUOTES ──
-// Plano gratuito brapi: 1 ativo por requisição
-// ── FETCH ──
-// Yahoo Finance usa tickers contínuos para futuros BR: WINc1, WDOc1, DOLc1
-const FUTURE_YAHOO = {
-  'WINFUT': 'WINc1',
-  'WDOFUT': 'WDOc1',
-  'DOLFUT': 'DOLc1',
-  'INDFUT': 'INDc1',
-};
-
-async function fetchFutureYahoo(displayTicker) {
-  const yahooTicker = FUTURE_YAHOO[displayTicker] || resolveTickerReal(displayTicker) + '.SA';
-  // Usa proxy CORS público para contornar bloqueio do Yahoo
-  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://query2.finance.yahoo.com/v7/finance/quote?symbols=' + yahooTicker + '&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent,regularMarketPreviousClose,regularMarketOpen,regularMarketDayHigh,regularMarketDayLow,regularMarketVolume,shortName,longName')}`;
-  const res = await fetch(proxyUrl);
-  const wrapper = await res.json();
-  const data = JSON.parse(wrapper.contents);
-  const q = data?.quoteResponse?.result?.[0];
-  if (!q || q.regularMarketPrice == null) throw new Error('Sem dados para ' + yahooTicker);
+// USD/BRL via AwesomeAPI — gratuito, CORS habilitado, tempo real
+async function fetchUsdBrl(displayTicker){
+  const res = await fetch('https://economia.awesomeapi.com.br/json/USD-BRL/1');
+  const data = await res.json();
+  const q = data[0];
+  if(!q) throw new Error('Sem dados USD-BRL');
+  const price = parseFloat(q.bid);
+  const prev  = parseFloat(q.pctChange) ? price / (1 + parseFloat(q.pctChange)/100) : parseFloat(q.open);
+  const chgAbs = price - prev;
+  const chgPct = (chgAbs / prev) * 100;
+  // Converte para pontos de contrato: WDO cotado em R$/US$ × 10.000 (tamanho US$10k)
+  const contractPrice = displayTicker === 'DOLFUT' ? price * 50000 : price * 10000;
   return {
     symbol: displayTicker,
     _displayTicker: displayTicker,
-    _realTicker: yahooTicker,
-    _source: 'yahoo',
-    shortName: q.shortName || displayTicker,
-    longName: q.longName || displayTicker,
-    regularMarketPrice: q.regularMarketPrice,
-    regularMarketChange: q.regularMarketChange,
-    regularMarketChangePercent: q.regularMarketChangePercent,
-    regularMarketPreviousClose: q.regularMarketPreviousClose,
-    regularMarketOpen: q.regularMarketOpen || null,
-    regularMarketDayHigh: q.regularMarketDayHigh || null,
-    regularMarketDayLow: q.regularMarketDayLow || null,
-    regularMarketVolume: q.regularMarketVolume || null,
+    _realTicker: 'USD-BRL',
+    _source: 'awesomeapi',
+    shortName: displayTicker === 'DOLFUT' ? 'Dólar Futuro (ref. USD/BRL)' : 'Mini Dólar Futuro (ref. USD/BRL)',
+    longName: `Cotação USD/BRL: R$ ${price.toFixed(4)}`,
+    regularMarketPrice: price,       // mostra em R$/USD para referência
+    regularMarketChange: chgAbs,
+    regularMarketChangePercent: chgPct,
+    regularMarketPreviousClose: prev,
+    regularMarketOpen: parseFloat(q.open) || null,
+    regularMarketDayHigh: parseFloat(q.high) || null,
+    regularMarketDayLow:  parseFloat(q.low)  || null,
+    regularMarketVolume: null,
+    _note: 'Cotação USD/BRL spot (referência para dólar futuro)',
+  };
+}
+
+// IBOVESPA via HG Brasil finance endpoint — gratuito, CORS ok
+async function fetchIbov(displayTicker){
+  const res = await fetch('https://api.hgbrasil.com/finance?format=json&key=demo&fields=only_results,ibovespa');
+  const data = await res.json();
+  const ibov = data?.results?.stocks?.IBOVESPA;
+  if(!ibov) throw new Error('Sem dados IBOVESPA HG');
+  const price  = ibov.points;
+  const prev   = ibov.points / (1 + ibov.change_percent/100);
+  const chgAbs = price - prev;
+  return {
+    symbol: displayTicker,
+    _displayTicker: displayTicker,
+    _realTicker: 'IBOVESPA',
+    _source: 'hgbrasil',
+    shortName: displayTicker === 'INDFUT' ? 'Índice Futuro (ref. IBOVESPA)' : 'Mini Índice Futuro (ref. IBOVESPA)',
+    longName: 'Referência: Ibovespa à vista',
+    regularMarketPrice: price,
+    regularMarketChange: chgAbs,
+    regularMarketChangePercent: ibov.change_percent,
+    regularMarketPreviousClose: prev,
+    regularMarketOpen: null,
+    regularMarketDayHigh: null,
+    regularMarketDayLow: null,
+    regularMarketVolume: ibov.volume || null,
+    _note: 'Pontuação do Ibovespa à vista (referência para mini índice futuro)',
   };
 }
 
 async function fetchOneTicker(ticker){
-  // Futuros: Yahoo Finance com ticker contínuo (WINc1 etc)
-  if(FUTURE_MAP[ticker]){
+  // Futuros: usa fontes alternativas gratuitas
+  if(FUTURE_MAP_TYPE[ticker]){
     try {
-      return await fetchFutureYahoo(ticker);
+      if(FUTURE_MAP_TYPE[ticker] === 'usd') return await fetchUsdBrl(ticker);
+      if(FUTURE_MAP_TYPE[ticker] === 'ibov') return await fetchIbov(ticker);
     } catch(e) {
-      console.warn('Yahoo falhou para', ticker, e.message);
+      console.warn('Erro futuro', ticker, e.message);
       return null;
     }
   }
@@ -708,7 +593,11 @@ function makeCard(w,r){
         <div class="asset-name">${name}</div>
       </div>
       <div class="card-right">
-        <span class="asset-price ${loadingClass}">${r?'R$ '+price:'Carregando...'}</span>
+        <span class="asset-price ${loadingClass}">${r ? (
+        r._source==='awesomeapi' ? 'R$ '+price+'/USD' :
+        r._source==='hgbrasil'  ? price+' pts' :
+        'R$ '+price
+      ) : 'Carregando...'}</span>
         <span class="chg-badge ${r?cc:'loading'}">${r?fmtChg(chgPct):'...'}</span>
       </div>
     </div>
@@ -719,6 +608,7 @@ function makeCard(w,r){
       <div class="detail-item"><span class="detail-label">Mínima</span><span class="detail-value down">R$ ${fmtPrice(r.regularMarketDayLow,w.ticker)}</span></div>
       <div class="detail-item"><span class="detail-label">Variação</span><span class="detail-value ${cc}">${chgAbs!=null?(chgAbs>=0?'+':'')+fmtPrice(chgAbs,w.ticker):'—'}</span></div>
       <div class="detail-item"><span class="detail-label">Volume</span><span class="detail-value">${fmtVol(r.regularMarketVolume)}</span></div>
+      ${r._note ? `<div class="detail-item" style="grid-column:1/-1"><span class="detail-label">Fonte</span><span class="detail-value" style="font-size:10px;color:var(--text3)">${r._note}</span></div>` : ''}
       <div class="detail-item"><span class="detail-label">Fechamento</span><span class="detail-value">R$ ${fmtPrice(r.regularMarketPreviousClose,w.ticker)}</span></div>
     </div>
     <div class="card-footer">
